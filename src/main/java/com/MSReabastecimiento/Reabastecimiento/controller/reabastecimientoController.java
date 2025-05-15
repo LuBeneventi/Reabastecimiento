@@ -1,0 +1,97 @@
+package com.MSReabastecimiento.Reabastecimiento.controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.MSReabastecimiento.Reabastecimiento.model.Reabastecimiento;
+import com.MSReabastecimiento.Reabastecimiento.model.itemReabastecimiento;
+import com.MSReabastecimiento.Reabastecimiento.service.reabastecimientoService;
+
+@RestController
+@RequestMapping("/api/reabastecimiento")
+public class reabastecimientoController {
+    
+    @Autowired
+    private reabastecimientoService rService;
+
+     @PostMapping("/generar")
+    public ResponseEntity<Reabastecimiento> crearPedido(@RequestBody Reabastecimiento pedido) {
+        Reabastecimiento nuevo = rService.crearPedido(pedido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Reabastecimiento>> listarPedidos() {
+        List<Reabastecimiento> lista = rService.listarPedidos();
+        return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Reabastecimiento> obtenerPedido(@PathVariable int id) {
+        return rService.obtenerPedidoPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/items")
+    public ResponseEntity<Reabastecimiento> agregarItem(
+            @PathVariable int id,
+            @RequestBody itemReabastecimiento item) {
+        try {
+            Reabastecimiento actualizado = rService.agregarItem(id, item);
+            return ResponseEntity.ok(actualizado);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/autorizar")
+    public ResponseEntity<?> autorizar(@PathVariable int id) {
+        try {
+            return ResponseEntity.ok(rService.autorizar(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Pedido no encontrado."));
+        }
+    }
+
+    @PostMapping("/{id}/enviar")
+    public ResponseEntity<?> enviar(@PathVariable int id) {
+        try {
+            return ResponseEntity.ok(rService.enviar(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Pedido no encontrado."));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/confirmar")
+    public ResponseEntity<?> confirmarRecepcion(@PathVariable int id) {
+        try {
+            return ResponseEntity.ok(rService.confirmarRecepcion(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Pedido no encontrado."));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    public ResponseEntity<?> cancelar(@PathVariable int id) {
+        try {
+            return ResponseEntity.ok(rService.cancelar(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Pedido no encontrado."));
+        }
+    }
+}
