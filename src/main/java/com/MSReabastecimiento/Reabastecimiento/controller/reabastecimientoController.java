@@ -21,11 +21,11 @@ import com.MSReabastecimiento.Reabastecimiento.service.reabastecimientoService;
 @RestController
 @RequestMapping("/api/reabastecimiento")
 public class reabastecimientoController {
-    
+
     @Autowired
     private reabastecimientoService rService;
 
-     @PostMapping("/generar")
+    @PostMapping("/generar")
     public ResponseEntity<Reabastecimiento> crearPedido(@RequestBody Reabastecimiento pedido) {
         Reabastecimiento nuevo = rService.crearPedido(pedido);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
@@ -87,11 +87,21 @@ public class reabastecimientoController {
         }
     }
 
+    @PostMapping("/{id}/cancelar")
     public ResponseEntity<?> cancelar(@PathVariable int id) {
         try {
             return ResponseEntity.ok(rService.cancelar(id));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Pedido no encontrado."));
         }
+    }
+
+    @GetMapping("/proveedor/{idProveedor}")
+    public ResponseEntity<List<Reabastecimiento>> listarPorProveedor(@PathVariable int idProveedor) {
+        List<Reabastecimiento> pedidos = rService.listarPorProveedor(idProveedor);
+        if (pedidos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(pedidos);
     }
 }

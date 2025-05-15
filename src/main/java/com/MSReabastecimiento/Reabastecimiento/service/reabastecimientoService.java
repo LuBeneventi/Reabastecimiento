@@ -73,4 +73,7 @@ public class reabastecimientoService {
         return rRepo.save(pedido);
     }
 
+    public List<Reabastecimiento> listarPorProveedor(int idProveedor) {
+    return rRepo.findByIdProveedor(idProveedor);
+}
 }
