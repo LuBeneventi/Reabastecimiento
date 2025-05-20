@@ -2,11 +2,14 @@ package com.MSReabastecimiento.Reabastecimiento.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.MSReabastecimiento.Reabastecimiento.DTO.ProveedorDTO;
 import com.MSReabastecimiento.Reabastecimiento.model.Reabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.model.estadoReabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.model.itemReabastecimiento;
@@ -17,6 +20,12 @@ public class reabastecimientoService {
 
     @Autowired
     private reabastecimientoRepository rRepo;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private EmailService emailService;
 
     public Reabastecimiento crearPedido(Reabastecimiento pedido) {
         pedido.setFechaCreacion(LocalDate.now());
@@ -47,13 +56,30 @@ public class reabastecimientoService {
     }
 
     public Reabastecimiento enviar(int id) {
-        Reabastecimiento pedido = rRepo.findById(id).orElseThrow();
+        Reabastecimiento pedido = rRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Pedido no encontrado"));
         if (pedido.getEstado() != estadoReabastecimiento.AUTORIZADO) {
             throw new IllegalStateException("El pedido debe estar AUTORIZADO para poder ENVIARLO.");
         }
         pedido.setEstado(estadoReabastecimiento.ENVIADO);
-        return rRepo.save(pedido);
-    }
+        rRepo.save(pedido);
+
+        String urlProveedor = "http://localhost:8081/api/proveedor/" + pedido.getIdProveedor();
+        ProveedorDTO proveedor = restTemplate.getForObject(urlProveedor, ProveedorDTO.class);
+
+        if(proveedor == null || proveedor.getCorreoProv() == null){
+            throw new IllegalStateException("No se pudo obtener el correo del proveedor");
+        }
+
+        String asunto = "Confirmación de envio - Pedido #" + pedido.getIdReabastecimiento();
+        String cuerpo = "Estimado " + proveedor.getNomProv() + ",\n\n"
+        + "Requerimos de los siguiente productos: " + pedido.getItems()
+        + "\nFecha: " + pedido.getFechaCreacion();
+
+        emailService.enviarCorreo(proveedor.getCorreoProv(), asunto, cuerpo);
+
+        return pedido;
+    }   
+    
 
     public Reabastecimiento cancelar(int id) {
         Reabastecimiento pedido = rRepo.findById(id).orElseThrow();
