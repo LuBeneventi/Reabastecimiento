@@ -56,7 +56,8 @@ public class reabastecimientoService {
     }
 
     public Reabastecimiento enviar(int id) {
-        Reabastecimiento pedido = rRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Pedido no encontrado"));
+        Reabastecimiento pedido = rRepo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Pedido no encontrado"));
         if (pedido.getEstado() != estadoReabastecimiento.AUTORIZADO) {
             throw new IllegalStateException("El pedido debe estar AUTORIZADO para poder ENVIARLO.");
         }
@@ -66,24 +67,23 @@ public class reabastecimientoService {
         String urlProveedor = "http://localhost:8081/api/proveedor/" + pedido.getIdProveedor();
         ProveedorDTO proveedor = restTemplate.getForObject(urlProveedor, ProveedorDTO.class);
 
-        if(proveedor == null || proveedor.getCorreoProv() == null){
+        if (proveedor == null || proveedor.getCorreoProv() == null) {
             throw new IllegalStateException("No se pudo obtener el correo del proveedor");
         }
 
         String asunto = "Confirmación de envio - Pedido #" + pedido.getIdReabastecimiento();
         String cuerpo = "Estimado " + proveedor.getNomProv() + ",\n\n"
-        + "Requerimos de los siguiente productos: " + pedido.getItems()
-        + "\nFecha: " + pedido.getFechaCreacion();
+                + "Requerimos de los siguiente productos: " + pedido.getItems()
+                + "\nFecha: " + pedido.getFechaCreacion();
 
         emailService.enviarCorreo(proveedor.getCorreoProv(), asunto, cuerpo);
 
         return pedido;
-    }   
-    
+    }
 
     public Reabastecimiento cancelar(int id) {
         Reabastecimiento pedido = rRepo.findById(id).orElseThrow();
-        if(pedido.getEstado() == estadoReabastecimiento.RECIBIDO){
+        if (pedido.getEstado() == estadoReabastecimiento.RECIBIDO) {
             throw new IllegalStateException("No se puede CANCELAR un pedido RECIBIDO.");
         }
         pedido.setEstado(estadoReabastecimiento.CANCELADO);
@@ -100,6 +100,27 @@ public class reabastecimientoService {
     }
 
     public List<Reabastecimiento> listarPorProveedor(int idProveedor) {
-    return rRepo.findByIdProveedor(idProveedor);
-}
+        return rRepo.findByIdProveedor(idProveedor);
+    }
+
+    public Reabastecimiento editarOrden(Reabastecimiento rea, int id) {
+        Reabastecimiento existente = rRepo.findById(id).orElseThrow();
+
+        if (existente.getEstado() != estadoReabastecimiento.EN_PROCESO) {
+            throw new IllegalStateException("Solo se pueden editar pedidos en estado EN_PROCESO.");
+        }
+        existente.setIdProveedor(rea.getIdProveedor());
+        existente.setItems(rea.getItems());
+        return crearPedido(existente);
+
+    }
+
+    public void eliminarPedido(int id) {
+        Reabastecimiento rea = rRepo.findById(id).orElseThrow();
+        if (!rRepo.existsById(id) && (rea.getEstado() != estadoReabastecimiento.CANCELADO) || rea.getEstado() != estadoReabastecimiento.EN_PROCESO) {
+            throw new NoSuchElementException("Pedido no encontrado");
+        }
+        rRepo.deleteById(id);
+    }
+
 }
