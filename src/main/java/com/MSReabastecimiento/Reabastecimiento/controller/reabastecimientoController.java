@@ -46,7 +46,7 @@ public class reabastecimientoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{id}/items")
+    @PutMapping("/{id}/items")
     public ResponseEntity<Reabastecimiento> agregarItem(
             @PathVariable int id,
             @RequestBody itemReabastecimiento item) {

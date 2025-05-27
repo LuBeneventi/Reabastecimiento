@@ -30,6 +30,7 @@ public class reabastecimientoService {
     public Reabastecimiento crearPedido(Reabastecimiento pedido) {
         pedido.setFechaCreacion(LocalDate.now());
         pedido.setEstado(estadoReabastecimiento.EN_PROCESO);
+        pedido.setItems(null);
         return rRepo.save(pedido);
     }
 
