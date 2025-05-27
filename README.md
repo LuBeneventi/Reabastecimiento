@@ -2,19 +2,19 @@
 ##
 ###
 INSERT INTO `reabastecimiento` (`id_reabastecimiento`, `estado`, `fecha_emision`, `id_proveedor`)
-VALUES (1001, 'Pendiente', '2025-05-20', 201);
+VALUES (1001, 'EN_PROCESO', '2025-05-20', 201);
 
 INSERT INTO `reabastecimiento` (`id_reabastecimiento`, `estado`, `fecha_emision`, `id_proveedor`)
-VALUES (1002, 'Completado', '2025-05-18', 202);
+VALUES (1002, 'RECIBIDO', '2025-05-18', 202);
 
 INSERT INTO `reabastecimiento` (`id_reabastecimiento`, `estado`, `fecha_emision`, `id_proveedor`)
-VALUES (1003, 'En tránsito', '2025-05-22', 203);
+VALUES (1003, 'ENVIADO', '2025-05-22', 203);
 
 INSERT INTO `reabastecimiento` (`id_reabastecimiento`, `estado`, `fecha_emision`, `id_proveedor`)
-VALUES (1004, 'Cancelado', '2025-05-19', 204);
+VALUES (1004, 'CANCELADO', '2025-05-19', 204);
 
 INSERT INTO `reabastecimiento` (`id_reabastecimiento`, `estado`, `fecha_emision`, `id_proveedor`)
-VALUES (1005, 'Pendiente', '2025-05-25', 205);
+VALUES (1005, 'EN_PROCESO', '2025-05-25', 205);
 
 
 INSERT INTO `reabastecimiento_items` (`reabastecimiento_id_reabastecimiento`, `cantidad`, `id_producto`)
