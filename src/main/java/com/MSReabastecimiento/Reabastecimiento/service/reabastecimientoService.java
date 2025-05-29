@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import com.MSReabastecimiento.Reabastecimiento.model.Reabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.model.estadoReabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.model.itemReabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.repository.reabastecimientoRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class reabastecimientoService {
@@ -44,9 +47,9 @@ public class reabastecimientoService {
 
     public Reabastecimiento agregarItem(int id, itemReabastecimiento item) {
         Reabastecimiento pedido = rRepo.findById(id).orElseThrow();
-        List<itemReabastecimiento> items = pedido.getItems();
-        items.add(item);
-        pedido.setItems(items);
+
+        item.setPedido(pedido);
+        pedido.getItems().add(item);
         return rRepo.save(pedido);
     }
 
@@ -74,7 +77,10 @@ public class reabastecimientoService {
 
         String asunto = "Confirmación de envio - Pedido #" + pedido.getIdReabastecimiento();
         String cuerpo = "Estimado " + proveedor.getNomProv() + ",\n\n"
-                + "Requerimos de los siguiente productos: " + pedido.getItems()
+                + "Requerimos de los siguiente productos:\n" + pedido.getItems().stream()
+                        .map(item -> "- Producto ID: " + item.getIdProducto() + ", cantidad: " + item.getCantidad())
+                        .collect(Collectors.joining("\n"))
+
                 + "\nFecha: " + pedido.getFechaCreacion();
 
         emailService.enviarCorreo(proveedor.getCorreoProv(), asunto, cuerpo);
@@ -118,10 +124,13 @@ public class reabastecimientoService {
 
     public void eliminarPedido(int id) {
         Reabastecimiento rea = rRepo.findById(id).orElseThrow();
-        if (!rRepo.existsById(id) && (rea.getEstado() != estadoReabastecimiento.CANCELADO) || rea.getEstado() != estadoReabastecimiento.EN_PROCESO) {
-            throw new NoSuchElementException("Pedido no encontrado");
+        if (rRepo.existsById(id) && (rea.getEstado() == estadoReabastecimiento.CANCELADO) ||
+                rea.getEstado() == estadoReabastecimiento.EN_PROCESO ||
+                rea.getEstado() == estadoReabastecimiento.RECIBIDO) {
+            rRepo.deleteById(id);
+            return;
         }
-        rRepo.deleteById(id);
+        throw new NoSuchElementException("Fallo al eliminar");
     }
 
 }

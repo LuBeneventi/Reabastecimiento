@@ -38,6 +38,4 @@ public class ProveedorDTO {
     public void setTelProv(String telProv) {
         this.telProv = telProv;
     }
-    
-
 }

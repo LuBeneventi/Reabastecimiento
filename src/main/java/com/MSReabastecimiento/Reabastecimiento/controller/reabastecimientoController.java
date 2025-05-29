@@ -123,7 +123,7 @@ public class reabastecimientoController {
     public ResponseEntity<?> eliminarPedido(@PathVariable int id) {
         try {
             rService.eliminarPedido(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("Eliminado con éxito");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }

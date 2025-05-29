@@ -17,20 +17,10 @@ INSERT INTO `reabastecimiento` (`id_reabastecimiento`, `estado`, `fecha_emision`
 VALUES (1005, 'EN_PROCESO', '2025-05-25', 205);
 
 
-INSERT INTO `reabastecimiento_items` (`reabastecimiento_id_reabastecimiento`, `cantidad`, `id_producto`)
-VALUES (1001, 50, 701);
-
-INSERT INTO `reabastecimiento_items` (`reabastecimiento_id_reabastecimiento`, `cantidad`, `id_producto`)
-VALUES (1002, 30, 702);
-
-INSERT INTO `reabastecimiento_items` (`reabastecimiento_id_reabastecimiento`, `cantidad`, `id_producto`)
-VALUES (1003, 100, 703);
-
-INSERT INTO `reabastecimiento_items` (`reabastecimiento_id_reabastecimiento`, `cantidad`, `id_producto`)
-VALUES (1004, 20, 704);
-
-INSERT INTO `reabastecimiento_items` (`reabastecimiento_id_reabastecimiento`, `cantidad`, `id_producto`)
-VALUES (1005, 75, 705);
+INSERT INTO `item_reabastecimiento`(`id`, `cantidad`, `id_producto`, `pedido_id`) VALUES (10, 50, 701,1001);
+INSERT INTO `item_reabastecimiento`(`id`, `cantidad`, `id_producto`, `pedido_id`) VALUES (20, 30, 702,1002);
+INSERT INTO `item_reabastecimiento`(`id`, `cantidad`, `id_producto`, `pedido_id`) VALUES (30, 100, 703,1003);
+INSERT INTO `item_reabastecimiento`(`id`, `cantidad`, `id_producto`, `pedido_id`) VALUES (40, 20, 704,1004);
 
 
 
