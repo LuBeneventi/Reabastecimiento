@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.MSReabastecimiento.Reabastecimiento.DTO.ProveedorDTO;
+import com.MSReabastecimiento.Reabastecimiento.DTO.estadoProveedor;
 import com.MSReabastecimiento.Reabastecimiento.model.Reabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.model.estadoReabastecimiento;
 import com.MSReabastecimiento.Reabastecimiento.model.itemReabastecimiento;
@@ -65,15 +66,16 @@ public class reabastecimientoService {
         if (pedido.getEstado() != estadoReabastecimiento.AUTORIZADO) {
             throw new IllegalStateException("El pedido debe estar AUTORIZADO para poder ENVIARLO.");
         }
-        pedido.setEstado(estadoReabastecimiento.ENVIADO);
-        rRepo.save(pedido);
 
         String urlProveedor = "http://localhost:8081/api/proveedor/" + pedido.getIdProveedor();
         ProveedorDTO proveedor = restTemplate.getForObject(urlProveedor, ProveedorDTO.class);
 
-        if (proveedor == null || proveedor.getCorreoProv() == null) {
-            throw new IllegalStateException("No se pudo obtener el correo del proveedor");
+        if (proveedor == null || proveedor.getCorreoProv() == null || proveedor.getEstado() == estadoProveedor.INACTIVO) {
+            throw new IllegalStateException("No se pudo enviar");
         }
+
+        pedido.setEstado(estadoReabastecimiento.ENVIADO);
+        rRepo.save(pedido);
 
         String asunto = "Confirmación de envio - Pedido #" + pedido.getIdReabastecimiento();
         String cuerpo = "Estimado " + proveedor.getNomProv() + ",\n\n"

@@ -5,6 +5,7 @@ public class ProveedorDTO {
     private int idProveedor;
     private String nomProv;
     private String correoProv;
+    private estadoProveedor estado;
     private String telProv;
     private String dirProv;
 
@@ -23,6 +24,9 @@ public class ProveedorDTO {
     public String getTelProv() {
         return telProv;
     }
+    public estadoProveedor getEstado() {
+        return estado;
+    }
     public void setCorreoProv(String correoProv) {
         this.correoProv = correoProv;
     }
@@ -37,5 +41,8 @@ public class ProveedorDTO {
     }
     public void setTelProv(String telProv) {
         this.telProv = telProv;
+    }
+    public void setEstado(estadoProveedor estado) {
+        this.estado = estado;
     }
 }
